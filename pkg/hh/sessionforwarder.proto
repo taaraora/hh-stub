@@ -1,21 +1,28 @@
 syntax = "proto3";
 package hh;
 
-import "google/protobuf/empty.proto";
-
 option go_package = "github.com/taaraora/hh-stub/pkg/hh";
 
-service SessionForwarder {
-  rpc ReportSessionsStats(ReportSessionsStatsRequest) returns (google.protobuf.Empty) {}
+enum bug {
+  open = 0;
+  closed = 1;
 }
 
-message ReportSessionsStatsRequest {
-  repeated SessionStats session_stats = 1;
+message empty {
+
 }
 
-message SessionStats {
+service sessionForwarder {
+  rpc reportSessionsStats(reportSessionsStatsRequest) returns (empty) {}
+}
+
+message reportSessionsStatsRequest {
+  repeated sessionStats session_stats = 1;
+}
+
+message sessionStats {
   string sid = 1;
-  repeated SessionStatsUsage usage = 2;
+  repeated sessionStatsUsage usage = 2;
   string imsi = 3;
   string imei = 4;
   string msisdn = 5;
@@ -42,7 +49,7 @@ message SessionStats {
   string ue_timezone = 26;
 }
 
-message SessionStatsUsage {
+message sessionStatsUsage {
   string rule_id = 1;
   uint64 bytes_tx = 2;
   uint64 bytes_rx = 3;
