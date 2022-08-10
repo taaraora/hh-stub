@@ -3,11 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/taaraora/hh-stub/pkg/hh"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/keepalive"
 	"log"
 	"time"
+
+	"github.com/taaraora/hh-stub/pkg/hh"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/keepalive"
 )
 
 func main() {
@@ -29,7 +31,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	serverURI := fmt.Sprintf("localhost:%d", 8080)
+	serverURI := fmt.Sprintf("localhost:%d", 8081)
 
 	conn, err := grpc.DialContext(ctx, serverURI, opts...)
 	if err != nil {
@@ -40,13 +42,23 @@ func main() {
 
 	log.Printf("connection successful to host %s", serverURI)
 
-	client := hh.NewSessionForwarderClient(conn)
+	client := hh.NewHeliumHandlerClient(conn)
 
 	req := &hh.ReportSessionsStatsRequest{
+		HotspotPubKeyBin: []byte{5, 7, 8, 8},
+		AgwSerialNumber:  "JHGHGJHKL-8897666-OLOLO",
 		SessionStats: []*hh.SessionStats{
 			&hh.SessionStats{
 				Sid: "fd",
-				Usage: []*hh.SessionStatsUsage{},
+				Usage: []*hh.SessionStatsUsage{
+					&hh.SessionStatsUsage{
+						RuleId:    "22",
+						BytesTx:   33,
+						BytesRx:   5555,
+						DroppedTx: 6767,
+						DroppedRx: 2018,
+					},
+				},
 				Imsi:                  "we",
 				Imei:                  "g",
 				Msisdn:                "weg",
@@ -69,10 +81,12 @@ func main() {
 				CauseForRecordClosing: 55,
 				RecordType:            12,
 				ChargingId:            13,
-				RawUserLocationInfo:   []byte{},
+				RawUserLocationInfo:   []byte{5, 7, 8, 8},
 				UeTimezone:            "15",
 			},
 		},
+
+		Signature: []byte{5, 7, 8, 8},
 	}
 
 	for {

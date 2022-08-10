@@ -20,7 +20,7 @@ func main() {
 
 	grpcServer := grpc.NewServer()
 
-	hh.RegisterSessionForwarderServer(grpcServer, &dummyServer{})
+	hh.RegisterHeliumHandlerServer(grpcServer, &dummyServer{})
 	grpcServer.Serve(lis)
 }
 
