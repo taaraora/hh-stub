@@ -11,9 +11,9 @@ service helium_handler {
 
 message report_sessions_stats_request {
   repeated session_stats session_stats = 1;
-  bytes hotspot_pub_key_bin = 2;
-  string agw_serial_number = 3;
-  bytes signature = 4;
+  string agw_serial_number = 2;
+  public_key hotspot_pub_key = 3;
+  signature signature = 4;
 }
 
 message session_stats {
@@ -52,3 +52,14 @@ message session_stats_usage {
   uint64 dropped_tx = 4;
   uint64 dropped_rx = 5;
 }
+
+message signature {
+  bytes r = 1;
+  bytes s = 2;
+}
+
+message public_key {
+  bytes x = 1;
+  bytes y = 2;
+}
+
