@@ -1,5 +1,5 @@
 syntax = "proto3";
-package api;
+package hh;
 
 option go_package = "github.com/taaraora/hh-stub/pkg/hh";
 
@@ -62,4 +62,3 @@ message public_key {
   bytes x = 1;
   bytes y = 2;
 }
-

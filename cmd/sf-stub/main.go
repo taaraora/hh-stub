@@ -55,7 +55,7 @@ func main() {
 
 	client := hh.NewHeliumHandlerClient(conn)
 
-	var lsn uint64 = 1
+	var lsn uint64 = uint64(time.Now().Unix())
 
 	for {
 		time.Sleep(time.Second * 5)
@@ -72,8 +72,22 @@ func main() {
 					Usage: []*hh.SessionStatsUsage{
 						&hh.SessionStatsUsage{
 							RuleId:    "22",
-							BytesTx:   33,
-							BytesRx:   5555,
+							BytesTx:   1111,
+							BytesRx:   1555,
+							DroppedTx: 6767,
+							DroppedRx: 2018,
+						},
+						&hh.SessionStatsUsage{
+							RuleId:    "22",
+							BytesTx:   222222222,
+							BytesRx:   3333,
+							DroppedTx: 6767,
+							DroppedRx: 2018,
+						},
+						&hh.SessionStatsUsage{
+							RuleId:    "22",
+							BytesTx:   222222222,
+							BytesRx:   3333,
 							DroppedTx: 6767,
 							DroppedRx: 2018,
 						},
@@ -91,7 +105,7 @@ func main() {
 					UeIpv6:                "5",
 					SgwIpv6:               "6",
 					PgwIpv6:               "7",
-					RatType:               100,
+					RatType:               6,
 					SessionStartTime:      200,
 					FinalRecord:           false,
 					LocalSequenceNumber:   lsn,
