@@ -20,7 +20,7 @@ message session_stats {
   string sid = 1;
   repeated session_stats_usage usage = 2;
   string imsi = 3;
-  string imei = 4;
+  bytes imei = 4;
   string msisdn = 5;
   string plmn_id = 6;
   string pgw_plmn_id = 7;

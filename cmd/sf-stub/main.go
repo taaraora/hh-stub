@@ -6,9 +6,13 @@ import (
 	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/sha256"
+	"crypto/tls"
 	"fmt"
+	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
 	"log"
 	"math/big"
+	mr "math/rand"
 	"time"
 
 	"github.com/taaraora/hh-stub/pkg/hh"
@@ -18,33 +22,55 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
+func init() {
+	mr.Seed(time.Now().UnixNano())
+}
+
+var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
 func main() {
 	keepaliveCfg := keepalive.ClientParameters{
 		//Time:                cfg.InactiveTimeout,
 		//Timeout:             cfg.KeepAliveTimeout,
 		//PermitWithoutStream: cfg.PermitWithoutStream,
 	}
-
-	opts := []grpc.DialOption{
-		grpc.WithInsecure(),
-		grpc.WithKeepaliveParams(keepaliveCfg),
-		//grpc.WithDefaultCallOptions(
-		//	grpc.MaxCallRecvMsgSize(cfg.MaxMessageSize),
-		//	grpc.MaxCallSendMsgSize(cfg.MaxMessageSize),
-		//),
+	config := &tls.Config{
+		//Certificates: []tls.Certificate{serverCert},
+		ClientAuth:         tls.NoClientCert,
+		InsecureSkipVerify: true,
 	}
 
-	priv, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
-	if err != nil {
-		log.Fatalf("cannot generate keypair, %s", err.Error())
+	tlsEnabled := false
+
+	creds := grpc.WithTransportCredentials(credentials.NewTLS(config))
+
+	opts := []grpc.DialOption{grpc.WithKeepaliveParams(keepaliveCfg)}
+
+	if tlsEnabled {
+		opts = append(opts, creds)
+	} else {
+		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	serverURI := fmt.Sprintf("localhost:%d", 8081)
+	//serverURI := fmt.Sprintf("hh.einstein.freedomfi.com:%d", 443)
 
 	conn, err := grpc.DialContext(ctx, serverURI, opts...)
+	if err != nil {
+		log.Fatalf("grpc dial err: %v", err.Error())
+	}
+
+	defer conn.Close()
+
+	priv, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	if err != nil {
+		log.Fatalf("cannot generate keypair, %s", err.Error())
+	}
+
+	conn, err = grpc.DialContext(ctx, serverURI, opts...)
 	if err != nil {
 		log.Fatalf("grpc dial err: %v", err.Error())
 	}
@@ -57,6 +83,10 @@ func main() {
 
 	var lsn uint64 = uint64(time.Now().Unix())
 
+	Imsi := RandStringRunes(30)
+	Sid := RandStringRunes(30)
+	PlmnId := RandStringRunes(30)
+
 	for {
 		time.Sleep(time.Second * 5)
 
@@ -68,7 +98,7 @@ func main() {
 			AgwSerialNumber: "JHGHGJHKL-8897666-OLOLO",
 			SessionStats: []*hh.SessionStats{
 				&hh.SessionStats{
-					Sid: "fd",
+					Sid: Sid,
 					Usage: []*hh.SessionStatsUsage{
 						&hh.SessionStatsUsage{
 							RuleId:    "22",
@@ -92,10 +122,10 @@ func main() {
 							DroppedRx: 2018,
 						},
 					},
-					Imsi:                  "we",
-					Imei:                  "g",
+					Imsi:                  Imsi,
+					Imei:                  []byte("g"),
 					Msisdn:                "weg",
-					PlmnId:                "er",
+					PlmnId:                PlmnId,
 					PgwPlmnId:             "re",
 					Apnni:                 "hh",
 					PdpType:               "lkl",
@@ -156,4 +186,12 @@ func signature(tx proto.Message, priv *ecdsa.PrivateKey) (*big.Int, *big.Int, er
 	}
 
 	return r, s, nil
+}
+
+func RandStringRunes(n int) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letterRunes[mr.Intn(len(letterRunes))]
+	}
+	return string(b)
 }
